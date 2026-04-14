@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>目录</title>
+  <meta name="description" content="相关文献目录，展示标题、作者、作者单位、期刊名称与摘要，并可直接进入每篇 HTML 阅读。">
+  <style>
+    :root {
+      --bg-a: #f6f1e7;
+      --bg-b: #f8dcb8;
+      --ink: #0f172a;
+      --muted: #334155;
+      --accent: #cd5c08;
+      --card: rgba(255, 255, 255, 0.74);
+      --line: rgba(148, 163, 184, 0.34);
+      --soft-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Times New Roman", "Noto Serif SC", "PingFang SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(1200px 620px at -10% -10%, rgba(255, 255, 255, 0.72), transparent 55%),
+        radial-gradient(900px 500px at 110% 10%, rgba(255, 182, 118, 0.34), transparent 55%),
+        linear-gradient(140deg, var(--bg-a), var(--bg-b));
+    }
+
+    .bg-decor {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: radial-gradient(circle at 50% 50%, black 20%, transparent 72%);
+      z-index: 0;
+    }
+
+    .index-page {
+      position: relative;
+      padding: 24px;
+    }
+
+    .hero,
+    .toolbar,
+    .card-grid {
+      position: relative;
+      z-index: 1;
+      width: min(1160px, 100%);
+      margin-inline: auto;
+    }
+
+    .hero {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--soft-shadow);
+      padding: 28px 28px 22px;
+      animation: rise 0.66s ease both;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--accent);
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+
+    .hero h1 {
+      margin: 10px 0 8px;
+      font-family: "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+      font-size: clamp(1.85rem, 3.2vw, 3rem);
+      line-height: 1.2;
+    }
+
+    .hero-sub {
+      margin: 0;
+      max-width: 74ch;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .stats {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .stats span {
+      border: 1px solid rgba(205, 92, 8, 0.28);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.92rem;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .toolbar {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr minmax(220px, 380px);
+      gap: 12px;
+      align-items: end;
+    }
+
+    .filter-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .filter-title {
+      margin: 0 0 2px;
+      color: #475569;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .filter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #1e293b;
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+    }
+
+    .filter-btn.active {
+      border-color: rgba(205, 92, 8, 0.5);
+      color: #7c2d12;
+    }
+
+    .search-wrap {
+      display: grid;
+      gap: 6px;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 11px 12px;
+      font: inherit;
+    }
+
+    .card-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .paper-card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--soft-shadow);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: rise 0.55s ease both;
+    }
+
+    .paper-card h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.38;
+    }
+
+    .paper-card h2 a {
+      color: #7c2d12;
+      text-decoration: none;
+    }
+
+    .paper-card h2 a:hover {
+      text-decoration: underline;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .card-badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.34);
+    }
+
+    .meta-row {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .abstract-preview {
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .abstract-preview summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: #7c2d12;
+    }
+
+    .abstract-preview p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .read-link {
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: #7c2d12;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 10px 12px;
+    }
+
+    .read-link:hover {
+      background: #9a3412;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 28px 14px;
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      border: 1px dashed var(--line);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+    }
+
+    .empty-state p {
+      margin: 6px 0 0;
+      color: #475569;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .index-page {
+        padding: 14px;
+      }
+      .hero {
+        padding: 18px 14px 16px;
+      }
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="index-page">
+  <div class="bg-decor"></div>
+
+  <header class="hero">
+    <p class="eyebrow">GitHub Pages · Static Archive</p>
+    <h1>文献目录</h1>
+    <p class="hero-sub">目录自动链接 <code>content</code> 中全部 HTML，并展示每篇文章的标题、作者、作者单位、期刊名称与摘要，可直接进入全文阅读。</p>
+    <div class="stats">
+      <span>总计 <strong id="statTotal">0</strong></span>
+      <span>当前显示 <strong id="statVisible">0</strong></span>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="filter-stack">
+      <div>
+        <p class="filter-title">文献分类</p>
+        <div class="filter-buttons" id="langFilters"></div>
+      </div>
+      <div>
+        <p class="filter-title">年份筛选</p>
+        <div class="filter-buttons" id="yearFilters"></div>
+      </div>
+    </div>
+    <label class="search-wrap" for="searchInput">
+      <span>检索</span>
+      <input id="searchInput" type="search" placeholder="按标题、作者、单位、期刊或摘要搜索">
+    </label>
+  </section>
+
+  <main class="card-grid" id="paperGrid"></main>
+
+  <template id="emptyStateTemplate">
+    <section class="empty-state">
+      <h2>没有匹配结果</h2>
+      <p>请尝试更换关键词或切换年份筛选。</p>
+    </section>
+  </template>
+
+  <script id="paperData" type="application/json">[{"title": "“去中心化”与“再中心化”_制度复杂性视角下的人民调解实践——以S市为例_戴康", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "戴康，复旦大学国际关系与公共事务学院博士后。陈鼎祥（通讯作者），北京师范大学政府治理研究中心助理教授、上海", "journal": "2025年第1期 2025年1月状态 关键词：“去中心化”“再中心化”人民调解制度制度复杂性", "abstract": "制度变迁是分析政治演化的重要视角，对制度变迁的研究长期因循非静即动的单一论证模型，从而 忽视了制度复杂性。文章以人民调解制度为例，分析制度复杂性何以形成、有何逻辑。案例研究显示，旨在推进制度创新的“去中心化”过程和意在促进制度重塑的“再中心化”过程，共同导致了人民调解制度的复杂性。通过深入剖析制度复杂性，文章识别出了三重逻辑机制：一是制度调适机制，指组织对制度程式进行的自发调整；二是制度叠合机制，指组织为了提升制度效能而融汇新规则与旧规则；三是制度冲突机制，指组织在促进制度变迁时采取的悖论行动。从本质上来说，以上三重逻辑共同导致人民调解制度处于变与不变的钟摆", "link": "content/CN/“去中心化”与“再中心化”_制度复杂性视角下的人民调解实践——以S市为例_戴康.html"}, {"title": "“网格+调解”何以化解基层矛盾？——以南京市为例_陈辉", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "陈辉，东南大学人文学院教授，南京师范大学公共管理学院教授，博士研究生导师，从事城市基层治理研究", "journal": "行政论坛", "abstract": "基层稳则天下安，基层治理是国家治理的重要基石。国家治理能力现代化与数字技术的拓展，推动网格化管理从政策试点到政策扩散，伴随社会转型期矛盾多发与风险不确定性因素增加，网格化管理也出现了投入多而见效低的内卷现象。如何完善网格化管理，及时化解基层矛盾纠纷，需要创新社会治理路径。“网格+调解”是城市基层治理的新方式，其将调解嵌入网格化管理，以说理方式就地化解基层社会矛盾与冲突。目前，学界尚未从学理上对“网格+调解”的运行机制与实际效果进行深入探讨。基于实地调研数据与深度访谈内容，通过系统梳理“网格+调解”治理的社会背景与治理场景，并运用量化分析探究网格调解度与网格满意率的内在关系，研究认为，“网格+调解”简约治理带来可信承诺与情感共同体，破解邻里纠纷处置结果非输即赢的零和博弈，以情感人、寓情于法，情理法交相融合化解矛盾，提升居民的幸福感，夯实基层稳定的社会基础，从而推进中国式基层治理现代化", "link": "content/CN/“网格+调解”何以化解基层矛盾？——以南京市为例_陈辉.html"}, {"title": "中国城市基层社会自治发展的路径——以改革开放以来城市人民调解制度的发展为例_陈尧", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "2020 年5 月上海行政学院学报第21 卷第3 期", "journal": "Journal of Shanghai Administration Institute", "abstract": "近年来，随着国家治理体系的逐步完善，基层群众性自治获得了新的发展机 遇。以改革开放以来人民调解制度的发展为例，在国家推动下，城市人民调解制度经历了重要变革：一方面，人民调解被当做司法助手、社会综合治理体系的组成部分、多元化纠纷解决机制的重要构成而逐渐被国家吸纳；另一方面，人民调解不仅在组织和功能上得到了扩张，而且在行为方式上表现为科层化发展，从而突破了地域性、群众性和自治性。通过治理吸纳自治，城市人民调解制度被纳入地方性国家科层制的框架，成为国家治理体系的组成部分。从城市人民调解制度的发展中可以看到，中国基层社会自治的发展道路既不同于随着市场经济和个人权利发展而形成的西方城市社会自治发展的市场化路径，也有别于 20世纪80年代后居民委员会的普遍建立，标志着中国城市基层自治进入了稳定发展时期，但21 世纪以来居委会的行政化，暴露出基层社会自治的局限。随着我国社会急剧转型和城市化进程的加快，日益突出的社会矛盾纠纷已经影响到城市基层社会的稳定和秩序。在一段时期内，城市基层社会秩序的构建，主要依赖国家公共权力，这种做法付出了巨大的行政成本，也不利于国家治理能力的现代化。在此背景下，国家通过吸纳社会资源、社会组织以实现多元化治理，成为构建国家治理体系现代化的必然途径。正是通过治理吸纳自治，人民调解制度逐渐发展为当代中国国家治理体系中一种重要制度，在维护整个社会尤其是基层社会的秩序和稳定方面发挥了特定作用。人民调解制度", "link": "content/CN/中国城市基层社会自治发展的路径——以改革开放以来城市人民调解制度的发展为例_陈尧.html"}, {"title": "乡村人民调解的权力结构与运行机制研究——以T市非正式防控为例_李扬", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "李扬，男，江苏省社会科学院副院长，江苏省习近平新时代中国特色社会主义思想研究中心特约研", "journal": "Journal of Nanjing Agricultural University", "abstract": "乡村人民调解在调和基层干群矛盾中发挥了重要作用。文章以浙江省T 市“村两委+乡贤会”的抗疫实践为例，分析非正式防控中乡村人民调解的权力结构与运行机制。研究发现，非正式防控背景下的乡村人民调解是在乡镇党政的统一领导下，以新乡贤群体为实质性主导的群众性抗疫活动。乡村人民调解通过利益激励、情感共融、文化规训和法治保障，有效维护了基层社会秩序，完善了乡村疫情防控，维护了乡村社会稳定", "link": "content/CN/乡村人民调解的权力结构与运行机制研究——以T市非正式防控为例_李扬.html"}, {"title": "乡村振兴背景下传统无讼法律文化再认识——基于广西玉林市博白县民富村的调研_王颖慧", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "王颖慧( 1983-)，女，山东滕州人，广西民族大学高级人力资源管理师，博士研究生，研究方向: 民", "journal": "第39 卷第6 期河北法学 Vol ．3 9，No．6 2 0 2 1 年6 月 Hebei Law Science Jun ．，2 0 2 1 DOI:10．16494 /j．cnki．1002-3933．2021．06．008 乡村振兴", "abstract": "无讼法律文化是我国古代的主导法律文化，强调用内在伦理道德规范百姓行为、 化解矛盾纠纷，使之不再诉讼。其思想根源是天人合一的和谐思想，主要方式是调解。通过对以民间调解闻名的民富村民间调解情况进行实地调研，并从农民、村干部、基层法院视角对无讼法律文化影响下农民乐于用民间调解处理矛盾纠纷的原因进行自我阐释，可清晰地看到无讼法律文化的现代纹理。在现代社会，与封建社会不同的是，无讼法律文化中消极因素的“存活空间”越来越小，无讼法律文化中的积极因素与社会主义核心价值观的内容相吻合，并且越来越呈现出与现代法治理念相融合的趋势。在全面推进依法治国和乡村振兴背景下，应尊重中华传统无讼法律文化，不断挖掘其中精华，对其进行创造性转化和创新性发展，使其融入新时代法治价值理念，与基层司法并驾齐驱，共同发挥在乡村治理体系中的作用，助推乡村振兴", "link": "content/CN/乡村振兴背景下传统无讼法律文化再认识——基于广西玉林市博白县民富村的调研_王颖慧.html"}, {"title": "乡村振兴背景下的土地纠纷调解及其制度完善_郭亮", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "郭亮，华中科技大学法学院教授、博士研究生导师", "journal": "争作用，甚至可以救济既有的法律漏洞［15］ 第36卷第4期总第一七六期 DOI:10．19648／j．cnki．jhustss1980．2022．04．04", "abstract": "在乡村振兴战略的实施中，随着大量人口的返乡和土地价值的上升，围绕土地的权属、收益和使用的纠 纷呈现出上升的趋势。由于土地纠纷的复杂性和特殊性，调解机制尤其是具有灵活性的人民调解将发挥重要的治理作用。在土地纠纷调解的过程中，除掌握相关的普遍性和规范性的法律知识外，调解者一般还需要具有土地的历史性、地方性和人格化的三重知识，由此才能实现乡村社会中的实质正义。为了具备这种知识和调解能力，中央和地方政府不仅要推动调解制度的自我完善，还需要改善其所嵌", "link": "content/CN/乡村振兴背景下的土地纠纷调解及其制度完善_郭亮.html"}, {"title": "人民调解何以成为维稳最前沿——基于贵州桐乡的法律人类学考察_温丙存", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "温丙存，中共重庆市委党校( 重庆行政学院) 经济社会发展研究所助理研究员，邮编: 400041", "journal": "Journal of Social Sciences Edition", "abstract": "基层群众自治原本是人民调解制度的设计初衷，但在运作实践中却被裹挟进国家的维稳治理格局中。基于贵州省桐乡的实地研究和文献研究发现，人民调解是这样被逐步推向维稳最前沿的: 首先，国家通过“一票否决式”的淘汰赛机制将乡镇政权“吸纳”到维稳中，赋予其维稳的职责、目标和任务; 接着，乡镇政权通过再造“因事而定的”乡村关系，把维稳任务分解、下沉，将村庄拉进维稳治理中; 最后，乡镇政权通过制度设计( 即矛盾纠纷排查调处机制) 和技术保障( 即依附于村干部身份的调解员) 来最终实现人民调解与维稳的“焊接”", "link": "content/CN/人民调解何以成为维稳最前沿——基于贵州桐乡的法律人类学考察_温丙存.html"}, {"title": "人民调解的模式适用与程序规范化_黄艳好", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "黄艳好（1984—），男，广西来宾人，博士，湘潭大学法学院讲师", "journal": "湘潭大学学报（哲学社会科学版）", "abstract": "当前人民调解呈现出主导劝服型、辅助促进型和纠纷评价型三种模式。这三种模式在运行过程中暴露出调解的自愿性保障不足、中立性难以保证、调解过程欠缺规范性要素、对事实和责任认定过于＂模糊＂等程序性问题。对此，应着重健全人民调解的自愿性保障规则，保证人民调解的利益中立和立场中立，提升人民调解的过程规范性，区分不同案件 教谕式、促进式、评估式三种类型。［5］1－4结合上述学者的划分，根据人民调解员的角色作用、调解特点和程序特征，本文将人民调解划分为主导劝服型、辅助促进型和纠纷评价型三种模式。（一）主导劝服型人民调解的适用主导劝服型人民调解是当前人民调解采用的主要模式，也契合立法对人民调解的基本定位。它部分承继了中国的传统文化和纠纷解决理念，广泛适用于基层民间纠纷，“讲事实、摆道理”“动之以情、晓之以理”是其生动的写照。该模式的特点在于，人民调解员往往在调解中扮演着一个“全能型”主导者的角色，善于动用组织背后的权力资源，并依据内部规则、乡规民约、传统道德等非正式性规范，“劝服”当事人接受调解结果。它更偏向于实体和结果，而不注重程序和过程。诚如学者所言，该模式下的调解“恰似一幕通过希望讲道理解决纠纷的第三人（说理者）与听别人讲道理而从内心表示服从的当事人（心服者）表演的戏剧”。［6］214 该模式在人民调解发展前期效果良好，但随着人民调解组织权威的消解，诉讼等正式纠纷解决方式的完善，以及非法律规范对人们的约束力降低，［7］33－34其局限性也日益凸显。其一，它更适合婚姻家庭、邻里、生产经营等传统民间纠纷，而对合同、消费、劳动争议等新型纠纷力有不逮。其二，它需要", "link": "content/CN/人民调解的模式适用与程序规范化_黄艳好.html"}, {"title": "从异化到回归_乡村振兴中人民调解复兴的挑战与应对_何阳", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "\u0007 \u0007何阳（1990-），电子科技大学公共管理学院助理研究员，研究方向：基层治理与", "journal": "Journal of Guangxi University", "abstract": "人民调解复兴面临着异化的现实挑战，实践中主要表现为功能上从多元性功能转化为单一性功能，性质上从民间性转化为行政性，功能方面转化降低了人民调解的权威性，限制了乡规民约的发展空间，性质方面转化改变了人民调解的原有形象，违背了创新社会治理体制要求。乡村振兴中人民调解的重新定位性质上应坚守民间性、群众性及自治性本质，功能上应延续纠纷解决功能，嵌入纠纷预防功能，重拾政治教育功能与政治动员功能。乡村振兴中促使人民调解复兴需要立法确认人民调解的纠纷预防功能与政治功能，明晰人民调解委员会权责体系，依法设立乡（镇）人民调解委员会，落实政府对人民调解工作的支持", "link": "content/CN/从异化到回归_乡村振兴中人民调解复兴的挑战与应对_何阳.html"}, {"title": "农村人民调解解纷效能变化机理及增效策略——基于“三治”环境的分析框架_何阳", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "湖南农业大学学报(社会科学版) 2022 年2 月第23 卷第1 期 Journal of Hunan Agricultural University(Social Sciences), Feb. 2022, 23(1):55–62", "journal": "Journal of Hunan Agricultural University", "abstract": "人民调解是化解农村社会矛盾纠纷的重要工具，工具效能的高低必然受到环境因素影响。从自治、法治和德治相结合的调解环境出发构建分析框架，对农村人民调解解纷效能变化机理及增效策略展开探讨。研究发现农村人民调解解纷效能最优态势的形成主要缘于自治环境和德治环境相对平衡，法治环境影响力小，且特定的社会背景对法治环境要求低，但原有环境从动态平衡转向暂时失衡，即自治环境嵌入行政，法治环境日渐成熟，德治环境受到破坏，打破了原有环境系统的和谐性，从而降低了农村人民调解解纷效能，导致当前农村人民调解解纷效能难以与20 世纪80 年代中后期相媲美。新时代国家增强农村人民调解解纷效能需要高度重视调解环境要素，树立自治、法治、德治环境有机平衡的立法理念，坚持农村人民调解村民自治属性，提升农村人民调解员法律素 Change mechanism of the rural people's mediation efficiency and synergy strategy: Based on the environmental perspective of“three governance”system HE Yang1，WANG Jun2* (1.Institute of National Politics, Yunnan University, Kunming 650091, China; 2.School of Public Affairs and Administration, University of Electronic Science and Technology, Chengdu 611731, China) mediation environment is an important perspective to examine the changes in mediation efficiency of rural people. Starting from the mediation environment with self-governance in combination with rule of law and rule of virtues, the article constructs an analytical framework to explore the mechanism of changes in the effectiveness of mediation among rural people. The study found that the formation of the remarkable situation of rural people's mediation efficiency is mainly due to the bala", "link": "content/CN/农村人民调解解纷效能变化机理及增效策略——基于“三治”环境的分析框架_何阳.html"}, {"title": "农村基层矛盾纠纷化解共治机制的优化及其治理效能_徐垚", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "徐垚，华中农业大学博士研究生，主要研究乡村社会治理问题。吴春梅，华中农业大学教授，主要", "journal": "Journal of South-Central Minzu University", "abstract": "近年，农村基层矛盾纠纷呈现出类型多样化、主体多元化、内容复合化、调处疑难化、矛盾易激化等特点，对农村安全治理提出了新的挑战。2010 以来，X 镇矛盾纠纷化解机制改革的重点是由前期以多元参与主体组织内的专项突破为主要特征的分治向系统内制度化的互联互动、联防联控为主要特征的共治转变，通过矛盾纠纷化解的网络化和体系化建设攻克长期各自为政的碎片化困境。针对现阶段队伍执行能力不强这一瓶颈，X 镇矛盾纠纷化解共治机制的优化方略应聚焦内在品质的全面提升，打造强能力的共治团队、强主体的共治格局、强联结的共治流程和强合力 是由前期以多元参与主体组织内的专项突破为主的分治向系统内制度化的互联互动、联防联控为主的共治转变，通过矛盾纠纷化解的网络化和体系化建设来攻克长期存在的各自为政的碎片化困境。作为县委县政府所在地的 X 镇，各项经济指标在乡镇综合考评中均名列前茅。从X 镇下辖48 个行政村中抽取10 个样本村进行实地调查。2019 年7 月课题组6 人对X 镇相关政府部门分管领导、工作人员和样本村村组干部、调解员、网格员、村民代表 ( 1．华中农业大学经济管理学院，湖北武汉430070; 2．华中农业大学马克思主义学院，湖北武汉430070)", "link": "content/CN/农村基层矛盾纠纷化解共治机制的优化及其治理效能_徐垚.html"}, {"title": "协同治理型基层人民调解联动机制及其运行困境与纾解——基于渝西南Q综合调解站的个案研究_丁文", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "丁文，湖北罗田人，华中师范大学法学院教授，博士生导师，民商法博士、政治学博士后；陈源媛，重庆人华中师范大学法学院博士研究生", "journal": "广西大学学报（哲学社会科学版）", "abstract": "党的二十大报告明确要求，健全城乡社区治理体系，及时把矛盾纠纷化解在基层、化解在萌芽状态。实证调研表明，渝西南S 区依托Q 综合调解站构建的协同治理型基层人民调解联动机制，通过完善基层矛盾纠纷化解共治格局、培育基层矛盾纠纷化解共治团队、优化基层矛盾纠纷化解共治流程，缓解了公权力机关的维稳压力、强化了人民调解制度的解纷功能、提升了基层矛盾纠纷化解的法治化水平，从而较为全面地提升了基层社会治理效能。但协同治理型基层人民调解联动机制的运行也面临人民调解员能力薄弱、人民调解组织定位双重、人民调解内生型权威阙如、人民调解分流规则模糊等实践困境。协同治理型基层人民调解联动机制的健全，应重点做好强化人民调解员队伍建设、理顺人民调解组织内部关系、重塑人民调解内生型权威以及规范人民调解分流规则等工作", "link": "content/CN/协同治理型基层人民调解联动机制及其运行困境与纾解——基于渝西南Q综合调解站的个案研究_丁文.html"}, {"title": "发挥人民调解的农村社会稳定作用_周庆智 (1)", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "未自动识别", "journal": "未自动识别", "abstract": "乡村社会信任关系具有熟人社会的一般特性，因此在传统乡村社会日常生活矛盾 纠纷的处置中，民间调解一直在发生作用。人民调解尊重民间调解习惯并将其作出现代性转化，实质上是将礼俗秩序与法律秩序结合起来。以人民调解的制度化形式介入乡村社会矛盾纠纷的化解，有利于乡村社会秩序和谐和法治进步", "link": "content/CN/发挥人民调解的农村社会稳定作用_周庆智 (1).html"}, {"title": "国家建设视角下“调解优先”的形成逻辑——基于珠三角地区D镇的案例研究_王清", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "王清，中山大学政治与公共事务管理学院、中国公共管理研究中心教授、博士生导师。刘海超，中山大学政治与公共事务管理学院博士研究生", "journal": "案例研究", "abstract": "未自动识别", "link": "content/CN/国家建设视角下“调解优先”的形成逻辑——基于珠三角地区D镇的案例研究_王清.html"}, {"title": "基层治理现代化与人民调解制度的改革路径_宋朝武", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "宋朝武，“2011 计划”国家司法文明协同创新中心教授、中国政法大学民商经济法学院教授; 罗曼，中国政法大学民商经济法学院博士生", "journal": "暨南学报( 哲学社会科学版)", "abstract": "人民调解是一项具有中国特色的基层纠纷解决制度。随着我国经济发展和社会结构的转型，人民调解制度在社会纠纷解决体系中日益边缘化。本文通过对人民调解制度实际运行的实证调查，对实践中人民调解制度存在的特点、困境、困境产生的原因等进行了总结和分析。在此基础上提出了诉调分流、立法完善、专业分化、职业发展的具体解决方案。以期充分发挥人民调解作用，推进国家治理体系与治理能力现代化", "link": "content/CN/基层治理现代化与人民调解制度的改革路径_宋朝武.html"}, {"title": "基层治理视域下乡村人民调解的现代转型_马树同", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "马树同，男，宁夏师范学院政治与历史学院讲师，主要研究方向为法理学、法社会学。—0 3 1—", "journal": "宁夏社会科学2019 年第1 期基层治理视域下乡村人民调解的现代转型马树同既是国家制度设计的推动，也是村民的自我选择。在基层治理中，人民调解功能的发挥直接取决于人民调解组织所依靠的基层自治体的运行状况，在村民自治尚不成熟的乡村社会，出现了村", "abstract": "社会转型期，乡村社会性质已然发生变化，乡镇人民调解委员会成了乡村人民调解的主要主体，这 解功能的当然发挥 ②。所以，笔者对乡村人民调解的考察，并不仅仅限于村一级的人民调解委员会，而是将其扩展到乡镇人民调解委员会。“现代社会对规则的确认并不是或不仅仅是规范性要求，而是一个实践问题，是一个过程。”［3］143 人民调解制度的运行，是一个与乡村社会环境相融合的过程，这就要求我们俯下身子，真正走入乡村社会中去。笔者曾用“现代熟人社会”这一概念界定特定区域乡村社会的性质。在这一社会形态中，人民调解是村民纠纷解决的主要方式 ③。人民调解作为重要的基层治理机制，其作用的发挥取决于基层组织的具体情况、村民素质、地方政府重视等因素 ［2］8。乡村社会性质的变迁，纠纷类型的变化，并不意味着人民调解适用性的降低 ④。在基层治理视域下，对人民调解的考察需要关照其本质———基层治理机制，从人民调解的民间性、自治性、群众性出发，结合乡村社会人民调解机制运行的具体情况，对人民调解作出全新评判。本项目的田野调查是在宁夏Y 县C 乡Z 村进行的。从2016 年至今，笔者每年都会到Z 村进行为期不定的调研，主要围绕乡村社会性质变迁、村民纠纷解决等主题进行。2018 年7 月，笔者再次前往Z", "link": "content/CN/基层治理视域下乡村人民调解的现代转型_马树同.html"}, {"title": "基层治理视域下的乡村纠纷化解——以关中Z区“老任说事”为例_赵天予", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "赵天予,女,中共中央党校社会和生态文明教研部博士研究生,主要研究方向为乡村社会治理", "journal": "期西北农林科技大学学报(社会科学版)", "abstract": "随着乡村社会变迁及观念转变,农民的权益意识越来越强烈,但政府面对基层社会的矛盾纠纷却越来越“有心无力”。乡村基层治理在日趋复杂化、多元化的社会背景下极需寻找突破口。采用文献研究法、半结构式访谈法和案例分析法,基于关中Z区的“老任说事”呈现两个案例事件的化解过程。在基层治理视域下,基于“制度-生活”的分析框架:在“制度”层面,深入剖析乡村纠纷化解的治理格局和运行机制;在“生活”层面,探讨人民调解员怎样促使社会秩序成为可能,阐释情理、关系、信任等传统文化在乡村纠纷化解中的内在逻辑。揭示“制度-生活”的互构如何促成“法理情”融合式治理模式,继而促使国家与社会在乡村纠纷化解中达成共建与共治", "link": "content/CN/基层治理视域下的乡村纠纷化解——以关中Z区“老任说事”为例_赵天予.html"}, {"title": "基层矛盾纠纷调处的“小马拉大车”问题及其纾解——以专业性社会组织赋能为路径_张帆", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "张帆，男，辽宁营口人，法学博士，吉林大学哲学社会学院副教授、博士生导师，主要研究方向：城乡基层治理，联", "journal": "期中南大学学报(社会科学版)", "abstract": "实现基层矛盾纠纷的善治，具有筑牢国家安全和社会稳定根基的重要价值。当前我国的基层矛 盾纠纷化解实践面临着“小马拉大车”的结构性困境，基层治理主体所保有的权力、资源和能力与矛盾纠纷聚集基层且愈发复杂、强烈的表达样态不甚匹配。实践证明，单纯依靠政治、行政和司法资源向基层下沉不足以从根本上解决问题。在国家与社会密切互动的崭新治理格局中，将新质态的“专业性社会组织”引入基层矛盾治理格局，是构成“壮马拉轻车”的重要解纷机制创新。专业性社会组织具有的组织制度性、专业技术性、群众亲和性、公信中立性、网络链接性等显著优势可以转化为基层实质性化解矛盾纠纷的治理效能", "link": "content/CN/基层矛盾纠纷调处的“小马拉大车”问题及其纾解——以专业性社会组织赋能为路径_张帆.html"}, {"title": "基层调解与法礼融合的纠纷化解机制——对一起乡村交通事故的法社会学分析_陆益龙", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "〕陆益龙，中国人民大学社会学理论与方法研究中心教授，博士生导师，北京 100872", "journal": "未自动识别", "abstract": "未自动识别", "link": "content/CN/基层调解与法礼融合的纠纷化解机制——对一起乡村交通事故的法社会学分析_陆益龙.html"}, {"title": "妈祖在上：民间信仰在基层矛盾纠纷化解中的作用与边界_陈科霖", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "未自动识别", "journal": "未自动识别", "abstract": "未自动识别", "link": "content/CN/妈祖在上：民间信仰在基层矛盾纠纷化解中的作用与边界_陈科霖.html"}, {"title": "家事调解的功能定位与制度设计——以厦门地区司法实践为样本_邹郁卓", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "邹郁卓，广东财经大学讲师、博士，广东财经大学法治与经济发展研究所成员( 广州", "journal": "2019 年第5 期者在社会关系中“说”法的过程分析。① ( 一) 法官的角色认知受访者普遍认为法官作为调解者应当具备社会经验并注重情理的二元回归。在家事纠纷中，当事人情绪尤为波动和敏感，纸面的诉求可能并非是当事人之间的真正矛盾所在，所以法", "abstract": "未自动识别", "link": "content/CN/家事调解的功能定位与制度设计——以厦门地区司法实践为样本_邹郁卓.html"}, {"title": "新时代“枫桥经验”在城市基层的落地条件与创新性发展——对上海市两个社区矛盾调解的案例比较_吴新叶", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "吴新叶,同济大学政治与国际关系学院长聘教授、博士生导师,同济大学中国特色社会主义理论研究中心研究员,主要从事基层", "journal": "未自动识别", "abstract": "未自动识别", "link": "content/CN/新时代“枫桥经验”在城市基层的落地条件与创新性发展——对上海市两个社区矛盾调解的案例比较_吴新叶.html"}, {"title": "民间法调解民事纠纷的功能、原则及路径_宋才发", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "宋才发（1953⁃），男，湖北武穴人，法学博士，中央民族大学法学院首任院长、二级教授，广西民族", "journal": "观释法说理”〔9〕；在无法律规范性文件作为裁判依据的民商事案件中，法官可“以社会主义核心价值观为指引，以最相类似的法律规定作为裁判依据”〔10〕；如果连“相类似的法律规定”也没有，法官“应当根据立法精神、立法目的和法律原则等作出司法裁判，并", "abstract": "民间法是国家法不可或缺的必要补充形式，是为民事纠纷调适和解决预备的一 种现成方案。核心价值观对民事纠纷解决具有指引功能，家族规约具有调解乡里邻间矛盾的法治功能，民间规约蕴含人与自然关系的调适功能，习惯法具有补充国家法能力不足功能。民间法调解民事纠纷的调适原则是：民间法进入民事纠纷调解场域转换原则，民间法调解民事纠纷坚持诚信为本原则，民间法调解民事纠纷遵从法律补充原则，私力救济调解纠纷适合民间法为主原则。运用民间法调解民事纠纷的基本路径是：基层司法要善于运用民间法调解民事纠纷，民间法调解民事纠纷要遵循民事调解制度和原则，民间民事纠纷调解适用侵权损害赔偿机制，乡村治理要发挥国家法与民间法的共同作用", "link": "content/CN/民间法调解民事纠纷的功能、原则及路径_宋才发.html"}, {"title": "法治乡村背景下人民调解的实践困境与优化路径——基于H省五地的经验考察_江岚", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "江岚,湖北大学副教授,主要研究刑事法学、社会治理法学。黄博健,湖北大学助理研究员,主要研", "journal": "Journal of South-Central Minzu", "abstract": "乡村振兴背景下,乡村人民调解逐渐成为乡村社会治理的一个重要手段。当前我国乡土社会正处于快速转型期,推动实现乡村依法治理,应更注重以人民调解委员会为主导的矛盾纠纷依法化解模式。通过对H 省五地的实地调查,当前乡村人民调解运行中面临调解组织缺乏实质上的独立性、调解活动的开展缺乏经费支持、人民调解机制下解纷调解意识缺位等现实困境。应当促进乡村人民调解员专职化发展,持续改进调解工作激励制度,积极推进“三治”协同治理,充分发挥乡村社会发展规律的矛盾纠纷化解机制", "link": "content/CN/法治乡村背景下人民调解的实践困境与优化路径——基于H省五地的经验考察_江岚.html"}, {"title": "社会治理创新视域下民间传统权威参与共治调查——以凉山州M县J乡德古参与治理现状为例_苏红丽", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "2. Xichang University Culture Research Center of Yi，Xichang，Sichuang 615000，China）", "journal": "期贵州民族研究", "abstract": "创新民族地区社会治理是构建和谐社会和现代国家治理体系的重要内容。凉山彝族地区因特殊的地理环境和风俗习惯，民间传统权威德古作为知晓彝族习惯法的纠纷调解者，对基层社会的和谐稳定和有序发展起到了积极作用，是彝区实现多元主体协同共治社会治理路径的重要动力。对凉山彝区传统权威德古在基层参与制定乡规民约、调解民间纠纷、开展移风易俗、宣传教育等治理过程中的功能进行梳理分析，探讨其参与治理能力提升的有效途径，可推动民族地区基层治理的创新、探索与改善", "link": "content/CN/社会治理创新视域下民间传统权威参与共治调查——以凉山州M县J乡德古参与治理现状为例_苏红丽.html"}, {"title": "科层借势与激励相容：乡镇多元解纷共治机制的构建逻辑——以华北P镇“4+N”矛盾调解中心为例_任群委", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "2025 年第2 期No. 2 2025 Journal of People,s Public Security University of China (Social Sciences Edition) 总第234 期Sum 234 中国人民公安大学学报(社会科学版) 科", "journal": "Journal of People", "abstract": "矛盾纠纷化解事关社会和谐稳定和国家安全大局。基于华北P 镇的个案实证性研究发现, P 镇多元解纷共治机制缘起于矛盾纠纷化解的现实压力倒逼, 形成于政策精神与基层实践经验融合上升为顶层设计, 发展于配套性制度不断健全。就其构建逻辑来看, 派出所以有效经验探索为“筹码”向镇党委进行科层借势, 利用层级和身份带来的“政治势能”差, 来强化党委领导、完善共治机制顶层设计、吸纳多元解纷主体注意力、增加多元解纷主体政治压力; 基于激励相容的逻辑, 推动共识凝聚、责任共担、利益相容和成就感共现, 激发多元解纷主体的工作动力。这些理论发现打开了我国基层社会多元解纷", "link": "content/CN/科层借势与激励相容：乡镇多元解纷共治机制的构建逻辑——以华北P镇“4+N”矛盾调解中心为例_任群委.html"}, {"title": "纠纷调解实践中的法礼融合——基于“枫桥经验”的分析_刘畅", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "〕 刘畅，武汉大学社会学院副教授，湖北武汉 430072", "journal": "江西师范大学学报", "abstract": "〕 法律原则与乡土礼俗之间的冲突和张力受到较多关注，而两者之间相互融合的 形态和方式不甚分明。枫桥经验由政府主导与民间主导结合形成的纠纷调解模式显示，法律与礼俗具有契合性之处得以强化，在维系特殊主义关系伦理的同时，也脱离特殊主义追求普遍主义公平的规则意识；两者形成递进式的融合模式，共同制御基于利益和情感的破坏性冲动。由此推动形成的个体秩序观念，是以法律规范为底线、以道德自我与伦理关系的实现为理想目标的双重复合结构。〔", "link": "content/CN/纠纷调解实践中的法礼融合——基于“枫桥经验”的分析_刘畅.html"}, {"title": "自主定向、工作特征与人民调解员工作绩效的关系——一项基于个人-环境匹配视角的混合研究_叶静", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "标的探讨,任何答案都离不开对人格特质和情境因素的讨论。很多理论也试图解释这两种因素的影响,例如,自我决定理论(Deci ① 中国政府网. (2006-10-8).", "journal": "公共管理评论,7(3):167-191. Cite this article: Ye J, Tang X X. The relationship work performance of people's conciliators: Mixe", "abstract": "向和工作特征为切入点,对人民调解员工作绩效的提升路径进行了解读,构建了“自主定向工作特征匹配→工作绩效”的逻辑链条。进一步地,结合对S 市人民调解员等相关主体的深度访谈和584 名基层人民调解员两阶段数据的定量研究,本文得出如下结论:一方面,自主定向和工作特征均能提升人民调解员的工作绩效,而非个人定向和控制定向对工作绩效并无显著影响;另一方面,高自主定向高工作特征的匹配模式对工作绩效具有促进作用,而控制定向工作特征匹配,以及非个人定向工作特征匹配对人民调解员工作绩效的影响并不显著。这一发现有利于基层政府从“人”的角度出发,优化调解员人格特质与工作特征的适配性以提高其工作绩效,对于完善基层人民调解工作激励机制、强化基层治理效能具有重要启示", "link": "content/CN/自主定向、工作特征与人民调解员工作绩效的关系——一项基于个人-环境匹配视角的混合研究_叶静.html"}, {"title": "行政吸纳与治理资源的生成：基于人民调解专业化的研究_钟杨", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "行政吸纳与治理资源的生成：基于人民调解专业化的研究 ◎钟杨（上海交通大学国际与公共事务学院，上海200030）◎韩舒立", "journal": "行政论坛", "abstract": "治理资源是指一切可以用来实现社会治理的资源，是解释中国治理体系和治理能力水平的关键变量。作为区别于市民社会和法团主义的第三种理论，行政吸纳被认为是当前培育、再造以及整合治理资源的重要机制。通过观察医患纠纷人民调解的发展过程，可以发现运动式治理触发了传统社会纠纷处理方式向专业化转型的启动机制，而由组织权威符号化、组织人员职业化、组织程序司法化和组织能力社会化构成的常态化治理模式，则推动了纠纷治理资源的持续性增长。作为率先通过行政吸纳将调解制度应用到行业性、专业性领域的尝试，医患纠纷人民调解在一定程度上发挥了缓解医患矛盾、改善医患关系的作用。研究发现，治理资源的结构和数量决定了治理模式的选择，随着治理体系的完善和治理能力的提升，运动式治理的积极成果有可能在常态治理中得到延续和巩固。这一过程意味着治理资源通过行政吸纳逐渐累积，并获得再次发展", "link": "content/CN/行政吸纳与治理资源的生成：基于人民调解专业化的研究_钟杨.html"}, {"title": "论人民调解的新趋势_行业协会调解的兴起_洪冬英", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "洪冬英( 1969－)，女，浙江桐乡人，教授，中国人民大学博士后流动站研究人员，从事诉讼法学研究", "journal": "未自动识别", "abstract": "行业协会调解方兴未艾，以行业协会作为调解主体的调解应当是我国人民调解制度的组成部分，行业协会的自治性、非政府性、中介性决定了行业协会调解的性质是人民调解。行业协会调解的兴起与发展是人民调解制度发展的新趋势，行业协会调解应当以其更强的自治性、权威性成为其发展的内在动力，同时以顺应国家多元化纠纷解决机制为外部发展动力，提升行业协会的作用。行业协会调解应当以其独特的优势存在并丰富人民调解制度内涵，在进一步提高调解参与者的广泛性、拓展人民调解功能、在线方式进行调解等方面完善", "link": "content/CN/论人民调解的新趋势_行业协会调解的兴起_洪冬英.html"}, {"title": "论基层社会治理模式创新之“五步调解法”——基于贵州龙盘村的个案考察_杨家佳", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "第44 卷总第252 期）Guizhou Ethnic Studies（Vol.44.General.No.252）2023 年第2 期贵州民族研究 No.2，2023 论基层社会治理模式创新之“五步调解法”——基于贵州龙盘村的个案考察杨家佳（中央民族大学法学院，北京 100081）", "journal": "未自动识别", "abstract": "龙盘村创新提出的“五步调解法”有效实现了农村化解纠纷的难题。之后，龙盘村通过党建引领、借鉴优秀治理经验以及创新治理模式对“五步调解法”进行了升级，从源头上确保社会秩序的和谐稳定，为实现乡村振兴提供保障。龙盘村纠纷解决机制是基层多元调解机制的实践经验，体现了基层社会治理发挥主体能动性，治理理念、治理制度、治理形式和治理结构都应以人民为中心的思路", "link": "content/CN/论基层社会治理模式创新之“五步调解法”——基于贵州龙盘村的个案考察_杨家佳.html"}, {"title": "论基层社会治理现代化中的乡贤调解_吴元元", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "西南财经大学法学院教授", "journal": "法商研究", "abstract": "作为多元化纠纷解决机制的有机组成部分,乡贤调解是基层社会治理现代化中的重要力量。乡贤在所处社会网络中居于枢纽位置,“德望”型乡贤、“能人”型乡贤和“专业精英”型乡贤构成乡贤的主要类型,其各自独到的内在规定性分别塑造了该群体在基层社会治理中的比较制度能力。乡贤在调解中具有特定的解纷技巧,体现了基层解纷实践的基本规律。由乡贤调解的复合型功能所决定,乡贤调解从濡化、抚慰、感召等多个层面共同推进了基层民主法治建设。未来,我们应当在理论体系建设、自治规范建设、情理法整合机制建设、人民调解员的组织队伍建设等维度对乡贤调解助力基层社会治理创新的方案展开积极的探索,持续推进新时代以“枫桥经验”为典型代表的社会治理机制的现代化转型", "link": "content/CN/论基层社会治理现代化中的乡贤调解_吴元元.html"}, {"title": "诉前调解的社会治理功能及制度前景_印子", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "未自动识别", "journal": "相关研究", "abstract": "在多元化纠纷解决机制中, 诉前调解是具有自主解纷功能的社会化解纷方式。人民调解所参与的纠纷化解成为诉前调解的主导形态。诉前调解的解纷功能并不局限于分解诉压, 还包括修复社会关系、调和社会张力、促进社会矛盾纠纷实质性化解。诉前调解解纷效能的发挥, 得益于司法系统为调解实践提供的各种支撑和保障。诉前调解运行机制面临的“案多人少”困境, 难以单纯依靠专业化、市场化或技术化手段予以解决。通过强化党政统筹以整合解纷资源, 破解调解资源壁垒以形塑解纷合力, 发挥基层法官在调解员选聘中的自主性, 能够确保诉前调解充分发挥将社会矛盾纠纷化解在基层的“基础性作用”", "link": "content/CN/诉前调解的社会治理功能及制度前景_印子.html"}]</script>
+  <script>
+    (function () {
+      "use strict";
+
+      const paperDataEl = document.getElementById("paperData");
+      const langFiltersEl = document.getElementById("langFilters");
+      const yearFiltersEl = document.getElementById("yearFilters");
+      const searchInput = document.getElementById("searchInput");
+      const paperGrid = document.getElementById("paperGrid");
+      const emptyStateTemplate = document.getElementById("emptyStateTemplate");
+      const statTotal = document.getElementById("statTotal");
+      const statVisible = document.getElementById("statVisible");
+
+      if (!paperDataEl || !langFiltersEl || !yearFiltersEl || !searchInput || !paperGrid || !statTotal || !statVisible) {
+        return;
+      }
+
+      let papers = [];
+      try {
+        papers = JSON.parse(paperDataEl.textContent || "[]");
+      } catch (error) {
+        paperGrid.innerHTML = "<section class=\"empty-state\"><h2>数据加载失败</h2><p>请检查 paper-data.json 与 index 页面数据是否完整。</p></section>";
+        return;
+      }
+
+      papers.sort((a, b) => {
+        const yearDiff = String(b.year || "").localeCompare(String(a.year || ""));
+        if (yearDiff !== 0) {
+          return yearDiff;
+        }
+        return String(a.title || "").localeCompare(String(b.title || ""), "zh-CN");
+      });
+
+      const yearSet = Array.from(new Set(papers.map((paper) => String(paper.year || "")).filter(Boolean)));
+      yearSet.sort((a, b) => b.localeCompare(a));
+
+      let activeLang = "all";
+      let activeYear = "all";
+
+      function resolveLanguage(paper) {
+        const raw = String(paper.language || paper.category || "").toUpperCase();
+        if (raw === "CN" || raw === "EN") {
+          return raw;
+        }
+        const link = String(paper.link || "");
+        if (link.includes("/EN/")) {
+          return "EN";
+        }
+        if (link.includes("/CN/")) {
+          return "CN";
+        }
+        const mixedText = [paper.title, paper.abstract].map((item) => String(item || "")).join(" ");
+        return /[\u4e00-\u9fff]/.test(mixedText) ? "CN" : "EN";
+      }
+
+      function clipText(text, maxLen) {
+        const raw = String(text || "").trim() || "未自动识别";
+        if (raw.length <= maxLen) {
+          return raw;
+        }
+        return raw.slice(0, maxLen).trimEnd() + "…";
+      }
+
+      function makeMetaRow(label, value) {
+        const row = document.createElement("p");
+        row.className = "meta-row";
+
+        const strong = document.createElement("strong");
+        strong.textContent = label + "：";
+        row.appendChild(strong);
+
+        row.append(" " + clipText(value, 180));
+        return row;
+      }
+
+      function createCard(paper) {
+        const article = document.createElement("article");
+        article.className = "paper-card";
+
+        const top = document.createElement("div");
+        top.className = "card-top";
+
+        const badgeType = document.createElement("span");
+        badgeType.className = "card-badge";
+        badgeType.textContent = resolveLanguage(paper) === "EN" ? "English" : "中文文献";
+
+        const badgeYear = document.createElement("span");
+        badgeYear.className = "card-badge";
+        badgeYear.textContent = paper.year || "年份未知";
+
+        top.appendChild(badgeType);
+        top.appendChild(badgeYear);
+
+        const heading = document.createElement("h2");
+        const titleLink = document.createElement("a");
+        titleLink.href = encodeURI(String(paper.link || "#"));
+        titleLink.textContent = paper.title || "未自动识别";
+        heading.appendChild(titleLink);
+
+        const authorRow = makeMetaRow("作者", paper.authors);
+        const affRow = makeMetaRow("作者单位", paper.affiliation);
+        const journalRow = makeMetaRow("期刊名称", paper.journal);
+
+        const details = document.createElement("details");
+        details.className = "abstract-preview";
+
+        const summary = document.createElement("summary");
+        summary.textContent = "摘要";
+
+        const abstractText = document.createElement("p");
+        abstractText.textContent = clipText(paper.abstract, 360);
+
+        details.appendChild(summary);
+        details.appendChild(abstractText);
+
+        const readLink = document.createElement("a");
+        readLink.className = "read-link";
+        readLink.href = encodeURI(String(paper.link || "#"));
+        readLink.textContent = "进入 HTML 阅读";
+
+        article.appendChild(top);
+        article.appendChild(heading);
+        article.appendChild(authorRow);
+        article.appendChild(affRow);
+        article.appendChild(journalRow);
+        article.appendChild(details);
+        article.appendChild(readLink);
+
+        return article;
+      }
+
+      function buildLanguageFilters() {
+        const options = [
+          { key: "all", label: "全部" },
+          { key: "CN", label: "中文" },
+          { key: "EN", label: "English" },
+        ];
+        options.forEach((option, idx) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = idx === 0 ? "filter-btn active" : "filter-btn";
+          button.textContent = option.label;
+          button.dataset.lang = option.key;
+          langFiltersEl.appendChild(button);
+        });
+
+        langFiltersEl.querySelectorAll(".filter-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            langFiltersEl.querySelectorAll(".filter-btn").forEach((node) => node.classList.remove("active"));
+            button.classList.add("active");
+            activeLang = button.dataset.lang || "all";
+            render();
+          });
+        });
+      }
+
+      function buildYearFilters() {
+        const allButton = document.createElement("button");
+        allButton.type = "button";
+        allButton.className = "filter-btn active";
+        allButton.textContent = "全部年份";
+        allButton.dataset.filter = "all";
+        yearFiltersEl.appendChild(allButton);
+
+        yearSet.forEach((year) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "filter-btn";
+          button.textContent = year;
+          button.dataset.filter = year;
+          yearFiltersEl.appendChild(button);
+        });
+
+        yearFiltersEl.querySelectorAll(".filter-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            yearFiltersEl.querySelectorAll(".filter-btn").forEach((node) => node.classList.remove("active"));
+            button.classList.add("active");
+            activeYear = button.dataset.filter || "all";
+            render();
+          });
+        });
+      }
+
+      function filterPapers() {
+        const keyword = String(searchInput.value || "").trim().toLowerCase();
+        return papers.filter((paper) => {
+          const langOk = activeLang === "all" || resolveLanguage(paper) === activeLang;
+          if (!langOk) {
+            return false;
+          }
+          const yearOk = activeYear === "all" || String(paper.year || "") === activeYear;
+          if (!yearOk) {
+            return false;
+          }
+          if (!keyword) {
+            return true;
+          }
+          const searchText = [paper.title, paper.authors, paper.affiliation, paper.journal, paper.abstract, paper.year]
+            .map((value) => String(value || ""))
+            .join(" ")
+            .toLowerCase();
+          return searchText.includes(keyword);
+        });
+      }
+
+      function render() {
+        const visiblePapers = filterPapers();
+        paperGrid.textContent = "";
+
+        visiblePapers.forEach((paper) => {
+          paperGrid.appendChild(createCard(paper));
+        });
+
+        if (visiblePapers.length === 0 && emptyStateTemplate && "content" in emptyStateTemplate) {
+          paperGrid.appendChild(emptyStateTemplate.content.cloneNode(true));
+        }
+
+        statTotal.textContent = String(papers.length);
+        statVisible.textContent = String(visiblePapers.length);
+      }
+
+      buildLanguageFilters();
+      buildYearFilters();
+      searchInput.addEventListener("input", render);
+      render();
+    })();
+  </script>
+</body>
+</html>
